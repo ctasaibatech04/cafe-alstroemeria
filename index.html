@@ -243,18 +243,35 @@
   .contact-lead{text-align:center;color:var(--text-sub);margin-bottom:40px;font-size:0.95rem;}
   .form-group{margin-bottom:22px;}
   .form-group label{display:block;font-size:0.88rem;margin-bottom:8px;color:var(--text-main);}
-  .form-group input,.form-group textarea{
-    width:100%;padding:13px 16px;border:1px solid var(--beige-deep);
+  .field-error{color:#c0392b;font-size:0.8rem;margin:0 0 8px;}
+  .form-group input.field-invalid,.form-group select.field-invalid{border-color:#c0392b;}
+  .form-group input,.form-group textarea,.form-group select{
+    padding:13px 16px;border:1px solid var(--beige-deep);
     background:var(--white);font-family:inherit;font-size:0.95rem;color:var(--text-main);
-    border-radius:2px;
+    border-radius:2px;box-sizing:border-box;
   }
-  .form-group textarea{min-height:130px;resize:vertical;}
+  .form-group textarea{width:100%;min-height:130px;resize:vertical;}
+  #resName{width:100%;}
+  #resCount,#resDate,#resTime{width:15rem;min-width:15rem;max-width:100%;}
   .form-submit{
     display:block;width:100%;padding:15px;background:var(--green-deep);color:var(--white);
     border:none;font-family:inherit;font-size:0.95rem;letter-spacing:0.08em;cursor:pointer;
     border-radius:2px;transition:background 0.3s ease;
   }
   .form-submit:hover{background:#5c7a4c;}
+  .reservation-complete{
+    text-align:center;font-size:1rem;color:var(--green-deep);
+    padding:18px;border:1px solid var(--green-deep);border-radius:2px;
+    background:var(--white);margin-bottom:22px;
+  }
+  .reservation-complete-message{margin:0 0 12px;}
+  .reservation-details{margin:0;padding-top:12px;border-top:1px solid var(--beige-deep);}
+  .reservation-detail-row{
+    display:flex;justify-content:center;gap:12px;
+    font-size:0.88rem;color:var(--text-main);margin-bottom:6px;
+  }
+  .reservation-detail-row dt{color:var(--text-sub);}
+  .reservation-detail-row dd{margin:0;}
   .form-note{
     text-align:center;font-size:0.8rem;color:var(--text-sub);margin-top:18px;
   }
@@ -280,7 +297,7 @@
       <li><a href="#home" class="nav-link">ホーム</a></li>
       <li><a href="#menu" class="nav-link">メニュー</a></li>
       <li><a href="#access" class="nav-link">アクセス</a></li>
-      <li><a href="#contact" class="nav-link">お問い合わせ</a></li>
+      <li><a href="#contact" class="nav-link">ご予約</a></li>
     </ul>
     <button class="hamburger" id="hamburger" aria-label="メニュー">
       <span></span><span></span><span></span>
@@ -397,26 +414,70 @@
 <section id="contact">
   <div class="contact-inner">
     <div class="section-head">
-      <p class="en-label">Contact</p>
-      <h2>お問い合わせ</h2>
+      <p class="en-label">Reservation</p>
+      <h2>ご予約</h2>
     </div>
-    <p class="contact-lead">ご予約・貸切のご相談・お問い合わせは、下記フォームよりお気軽にどうぞ。</p>
-    <form onsubmit="return false;">
+    <p class="contact-lead">ご来店のご予約は、下記フォームよりお気軽にどうぞ。</p>
+    <div id="reservationComplete" class="reservation-complete" hidden tabindex="-1">
+      <p class="reservation-complete-message">ご予約が完了しました。</p>
+      <dl id="reservationDetails" class="reservation-details"></dl>
+    </div>
+    <form id="reservationForm" novalidate>
       <div class="form-group">
-        <label for="name">お名前</label>
-        <input type="text" id="name" name="name">
+        <label for="resName">お名前</label>
+        <p class="field-error" id="resNameError" hidden>お名前を入力してください。</p>
+        <input type="text" id="resName" name="resName" aria-describedby="resNameError">
       </div>
       <div class="form-group">
-        <label for="email">メールアドレス</label>
-        <input type="email" id="email" name="email">
+        <label for="resCount">人数</label>
+        <p class="field-error" id="resCountError" hidden>人数を選択してください。</p>
+        <select id="resCount" name="resCount" aria-describedby="resCountError">
+          <option value="" disabled selected>選択してください</option>
+          <option value="1">1名</option>
+          <option value="2">2名</option>
+          <option value="3">3名</option>
+          <option value="4">4名</option>
+          <option value="5">5名</option>
+          <option value="6">6名</option>
+          <option value="7">7名</option>
+          <option value="8">8名</option>
+          <option value="9">9名</option>
+          <option value="10">10名</option>
+        </select>
       </div>
       <div class="form-group">
-        <label for="message">お問い合わせ内容</label>
-        <textarea id="message" name="message"></textarea>
+        <label for="resDate">日にち</label>
+        <p class="field-error" id="resDateError" hidden>日にちを選択してください。</p>
+        <input type="date" id="resDate" name="resDate" aria-describedby="resDateError">
       </div>
-      <button type="submit" class="form-submit">送信する</button>
+      <div class="form-group">
+        <label for="resTime">ご来店時間</label>
+        <p class="field-error" id="resTimeError" hidden>ご来店時間を選択してください。</p>
+        <select id="resTime" name="resTime" aria-describedby="resTimeError">
+          <option value="" disabled selected>選択してください</option>
+          <option value="9:00">9:00</option>
+          <option value="9:30">9:30</option>
+          <option value="10:00">10:00</option>
+          <option value="10:30">10:30</option>
+          <option value="11:00">11:00</option>
+          <option value="11:30">11:30</option>
+          <option value="12:00">12:00</option>
+          <option value="12:30">12:30</option>
+          <option value="13:00">13:00</option>
+          <option value="13:30">13:30</option>
+          <option value="14:00">14:00</option>
+          <option value="14:30">14:30</option>
+          <option value="15:00">15:00</option>
+          <option value="15:30">15:30</option>
+          <option value="16:00">16:00</option>
+          <option value="16:30">16:30</option>
+          <option value="17:00">17:00</option>
+          <option value="17:30">17:30</option>
+        </select>
+      </div>
+      <button type="submit" class="form-submit">予約する</button>
     </form>
-    <p class="form-note">※ こちらはデザイン見本です。現在、送信機能はありません。</p>
+    <p class="form-note">※ こちらはデザイン見本です。実際の送信・予約処理は行われません。</p>
   </div>
 </section>
 
@@ -446,6 +507,122 @@
       navLinks.classList.remove('open');
     });
   });
+
+  /* ---------- RESERVATION FORM（画面内のみで完結、送信なし） ---------- */
+  const reservationForm = document.getElementById('reservationForm');
+  const reservationComplete = document.getElementById('reservationComplete');
+  const reservationDetails = document.getElementById('reservationDetails');
+  if (reservationForm) {
+    const resNameInput = document.getElementById('resName');
+    const resCountSelect = document.getElementById('resCount');
+    const resDateInput = document.getElementById('resDate');
+    const resTimeSelect = document.getElementById('resTime');
+    const todayStr = new Date().toLocaleDateString('sv-SE'); // YYYY-MM-DD（ローカル日付）
+    resDateInput.min = todayStr;
+    resDateInput.value = todayStr;
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function formatDate(value) {
+      const d = new Date(value + 'T00:00:00');
+      const days = ['日', '月', '火', '水', '木', '金', '土'];
+      return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日（${days[d.getDay()]}）`;
+    }
+
+    function renderDetails() {
+      const rows = [
+        ['お名前', `${resNameInput.value.trim()} 様`],
+        ['人数', resCountSelect.options[resCountSelect.selectedIndex].text],
+        ['日にち', formatDate(resDateInput.value)],
+        ['ご来店時間', resTimeSelect.value]
+      ];
+      reservationDetails.innerHTML = rows.map(([label, value]) =>
+        `<div class="reservation-detail-row"><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`
+      ).join('');
+    }
+
+    const CLOSED_DAYS = [0, 6]; // 日・土（定休日）
+
+    const fields = [
+      {
+        input: document.getElementById('resName'),
+        error: document.getElementById('resNameError'),
+        getError: (el) => el.value.trim() === '' ? 'お名前を入力してください。' : ''
+      },
+      {
+        input: document.getElementById('resCount'),
+        error: document.getElementById('resCountError'),
+        getError: (el) => el.value === '' ? '人数を選択してください。' : ''
+      },
+      {
+        input: resDateInput,
+        error: document.getElementById('resDateError'),
+        getError: (el) => {
+          if (el.value === '') return '日にちを選択してください。';
+          if (el.value < todayStr) return '本日以降の日にちを選択してください。';
+          const day = new Date(el.value + 'T00:00:00').getDay();
+          if (CLOSED_DAYS.includes(day)) return '土・日は定休日のため、ご予約いただけません。';
+          return '';
+        }
+      },
+      {
+        input: document.getElementById('resTime'),
+        error: document.getElementById('resTimeError'),
+        getError: (el) => el.value === '' ? 'ご来店時間を選択してください。' : ''
+      }
+    ];
+
+    function showError(field) {
+      field.error.textContent = field.getError(field.input);
+      field.error.hidden = false;
+      field.input.classList.add('field-invalid');
+      field.input.setAttribute('aria-invalid', 'true');
+    }
+
+    function clearError(field) {
+      field.error.hidden = true;
+      field.input.classList.remove('field-invalid');
+      field.input.removeAttribute('aria-invalid');
+    }
+
+    fields.forEach((field) => {
+      const recheck = () => {
+        if (field.getError(field.input) === '') clearError(field);
+      };
+      field.input.addEventListener('input', recheck);
+      field.input.addEventListener('change', recheck);
+    });
+
+    reservationForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      reservationComplete.hidden = true;
+
+      let firstInvalid = null;
+      fields.forEach((field) => {
+        if (field.getError(field.input) === '') {
+          clearError(field);
+        } else {
+          showError(field);
+          if (!firstInvalid) firstInvalid = field.input;
+        }
+      });
+
+      if (firstInvalid) {
+        firstInvalid.focus();
+        return;
+      }
+
+      renderDetails();
+      reservationForm.reset();
+      resDateInput.value = todayStr;
+      reservationComplete.hidden = false;
+      reservationComplete.focus();
+    });
+  }
 
   /* ---------- WEATHER (Open-Meteo) ---------- */
   (function(){
