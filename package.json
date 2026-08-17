@@ -1,0 +1,13 @@
+{
+  "name": "watashi-no-omise",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "resend": "^6.0.1"
+  }
+}
