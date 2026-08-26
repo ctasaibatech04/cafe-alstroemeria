@@ -616,6 +616,17 @@
         return;
       }
 
+      fetch('/api/reserve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: resNameInput.value.trim(),
+          count: resCountSelect.value,
+          date: resDateInput.value || todayStr,
+          time: resTimeSelect.value
+        })
+      }).catch(() => {});
+
       renderDetails();
       reservationForm.reset();
       resDateInput.value = todayStr;
