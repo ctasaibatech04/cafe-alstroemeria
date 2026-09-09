@@ -2,10 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const { Resend } = require('resend');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const PORT = 3000;
 const resend = new Resend(process.env.RESEND_API_KEY);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -13,6 +15,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.post('/api/reserve', async (req, res) => {
   const { name, count, date, time } = req.body;
   console.log(`予約受付: 名前=${name} 人数=${count} 日にち=${date} 時間=${time}`);
+
+  const { error: dbError } = await supabase.from('alstroemeria_reservations').insert({
+    name,
+    party_size: Number(count),
+    reservation_date: date,
+    reservation_time: time,
+  });
+
+  if (dbError) {
+    console.error('予約の保存に失敗しました:', dbError);
+    return res.status(500).json({ message: '予約の保存に失敗しました' });
+  }
 
   try {
     await resend.emails.send({
