@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>予約一覧 | カフェ・アリストロメリア</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&family=Cormorant+Garamond:ital@1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#faf5ea;
+    --beige:#f2e8d8;
+    --beige-deep:#e9dcc4;
+    --green-deep:#6f8a5e;
+    --gold:#bf9a56;
+    --text-main:#4a3b30;
+    --text-sub:#7a6a5a;
+    --white:#fffdf8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;padding:32px 16px 48px;
+    background:var(--cream);color:var(--text-main);
+    font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  }
+  .wrap{max-width:960px;margin:0 auto;}
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
+  .en{display:block;font-family:"Cormorant Garamond",serif;font-style:italic;color:var(--gold);font-size:0.95rem;}
+  h1{margin:0;font-size:1.5rem;font-weight:600;letter-spacing:0.06em;}
+  .meta{font-size:0.85rem;color:var(--text-sub);display:flex;align-items:center;gap:12px;}
+  button{
+    background:var(--green-deep);color:var(--white);border:none;border-radius:4px;
+    padding:8px 16px;font-family:inherit;font-size:0.9rem;cursor:pointer;
+  }
+  button:hover{opacity:0.9;}
+  button:disabled{opacity:0.6;cursor:wait;}
+  button.small{padding:5px 12px;font-size:0.85rem;}
+  button.ghost{background:transparent;color:var(--text-sub);border:1px solid var(--beige-deep);}
+  .table-box{overflow-x:auto;background:var(--white);border:1px solid var(--beige-deep);border-radius:6px;}
+  table{width:100%;border-collapse:collapse;font-size:0.95rem;}
+  th,td{padding:12px 14px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--beige);}
+  th{background:var(--beige);font-weight:600;font-size:0.85rem;color:var(--text-sub);}
+  tbody tr:last-child td{border-bottom:none;}
+  td.num{text-align:right;}
+  td.sub{color:var(--text-sub);font-size:0.85rem;}
+  td.actions{text-align:right;}
+  td.actions button + button{margin-left:6px;}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+  .msg{padding:32px;text-align:center;color:var(--text-sub);}
+  select, tr.editing input{
+    font-family:inherit;font-size:0.9rem;color:var(--text-main);
+    padding:5px 8px;border:1px solid var(--beige-deep);border-radius:4px;background:var(--white);
+  }
+  select{cursor:pointer;}
+  select:disabled{opacity:0.6;cursor:wait;}
+  select.s-unconfirmed{background:#fbf1dc;border-color:#e6cf9e;}
+  select.s-confirmed{background:#eaf0e3;border-color:#bfcfae;color:var(--green-deep);}
+  select.s-cancelled{background:#f1ece6;border-color:#d9d0c5;color:var(--text-sub);}
+  tr.cancelled td:not(.status):not(.actions){color:#a89a85;text-decoration:line-through;}
+  tr.editing td{background:#fbf6ea;padding-top:8px;padding-bottom:8px;}
+  tr.editing input[type="text"]{width:9em;}
+  .toast{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+    background:var(--text-main);color:var(--white);padding:10px 18px;border-radius:4px;font-size:0.9rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <span class="en">Reservations</span>
+      <h1>予約一覧</h1>
+    </div>
+    <div class="meta">
+      <span id="count"></span>
+      <button type="button" id="reload">再読み込み</button>
+    </div>
+  </header>
+
+  <div class="table-box">
+    <table>
+      <thead>
+        <tr>
+          <th>予約日</th>
+          <th>時間</th>
+          <th>お名前</th>
+          <th>人数</th>
+          <th>受付日時</th>
+          <th>状態</th>
+          <th><span class="visually-hidden">操作</span></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="msg" id="msg">読み込み中…</p>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+  const rows = document.getElementById('rows');
+  const msg = document.getElementById('msg');
+  const count = document.getElementById('count');
+  const toast = document.getElementById('toast');
+  const WEEK = ['日', '月', '火', '水', '木', '金', '土'];
+  const STATUS_CLASS = { '未確認': 's-unconfirmed', '確認済み': 's-confirmed', 'キャンセル': 's-cancelled' };
+  // お店のページの予約フォームと同じ選択肢
+  const TIMES = Array.from({ length: 18 }, (_, i) => `${9 + Math.floor(i / 2)}:${i % 2 ? '30' : '00'}`);
+  const SIZES = Array.from({ length: 10 }, (_, i) => i + 1);
+  let toastTimer;
+
+  function showToast(text) {
+    toast.textContent = text;
+    toast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toast.hidden = true; }, 3000);
+  }
+
+  async function saveReservation(id, changes) {
+    const res = await fetch(`/api/reservations/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(changes),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.message || '保存できませんでした。もう一度お試しください。');
+    return body;
+  }
+
+  function formatDate(value) {
+    const [y, m, d] = value.split('-').map(Number);
+    const w = WEEK[new Date(y, m - 1, d).getDay()];
+    return `${y}/${m}/${d}（${w}）`;
+  }
+
+  function formatCreatedAt(value) {
+    return new Date(value).toLocaleString('ja-JP', {
+      timeZone: 'Asia/Tokyo', year: 'numeric', month: 'numeric', day: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+  }
+
+  function cell(content, className) {
+    const td = document.createElement('td');
+    if (typeof content === 'string') td.textContent = content;
+    else td.append(...[].concat(content));
+    if (className) td.className = className;
+    return td;
+  }
+
+  function makeButton(label, className, onClick) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = label;
+    button.className = className;
+    button.addEventListener('click', onClick);
+    return button;
+  }
+
+  function makeSelect(values, current, label, format = (v) => v) {
+    const select = document.createElement('select');
+    select.setAttribute('aria-label', label);
+    const list = values.map(String);
+    // 選択肢にない古い値が入っていても消えないようにする
+    if (!list.includes(String(current))) list.unshift(String(current));
+    for (const v of list) select.append(new Option(format(v), v));
+    select.value = String(current);
+    return select;
+  }
+
+  function applyStatus(tr, select, status) {
+    select.value = status;
+    select.className = STATUS_CLASS[status] || '';
+    tr.classList.toggle('cancelled', status === 'キャンセル');
+  }
+
+  function statusCell(tr, r) {
+    const select = makeSelect(Object.keys(STATUS_CLASS), r.status, `${r.name}様の予約の状態`);
+    applyStatus(tr, select, r.status);
+
+    select.addEventListener('change', async () => {
+      select.disabled = true;
+      try {
+        Object.assign(r, await saveReservation(r.id, { status: select.value }));
+        showToast(`${r.name}様の予約を「${r.status}」にしました`);
+      } catch {
+        showToast('状態を変更できませんでした。もう一度お試しください。');
+      } finally {
+        applyStatus(tr, select, r.status);
+        select.disabled = false;
+      }
+    });
+
+    return cell(select, 'status');
+  }
+
+  function renderRow(r) {
+    const tr = document.createElement('tr');
+    tr.append(
+      cell(formatDate(r.reservation_date)),
+      cell(r.reservation_time),
+      cell(r.name),
+      cell(`${r.party_size}名`, 'num'),
+      cell(formatCreatedAt(r.created_at), 'sub'),
+      statusCell(tr, r),
+      cell(makeButton('編集', 'small ghost', () => tr.replaceWith(renderEditRow(r))), 'actions'),
+    );
+    return tr;
+  }
+
+  function renderEditRow(r) {
+    const tr = document.createElement('tr');
+    tr.className = 'editing';
+
+    const date = document.createElement('input');
+    date.type = 'date';
+    date.value = r.reservation_date;
+    date.setAttribute('aria-label', '予約日');
+
+    const time = makeSelect(TIMES, r.reservation_time, '時間');
+
+    const name = document.createElement('input');
+    name.type = 'text';
+    name.value = r.name;
+    name.maxLength = 50;
+    name.setAttribute('aria-label', 'お名前');
+
+    const size = makeSelect(SIZES, r.party_size, '人数', (v) => `${v}名`);
+
+    const cancel = makeButton('やめる', 'small ghost', () => tr.replaceWith(renderRow(r)));
+    const save = makeButton('保存', 'small', async () => {
+      if (!date.value) return showToast('予約日を入れてください');
+      if (!name.value.trim()) return showToast('お名前を入れてください');
+
+      save.disabled = cancel.disabled = true;
+      try {
+        Object.assign(r, await saveReservation(r.id, {
+          reservation_date: date.value,
+          reservation_time: time.value,
+          name: name.value,
+          party_size: Number(size.value),
+        }));
+        tr.replaceWith(renderRow(r));
+        showToast(`${r.name}様の予約を変更しました`);
+      } catch (e) {
+        showToast(e.message);
+        save.disabled = cancel.disabled = false;
+      }
+    });
+
+    tr.append(
+      cell(date),
+      cell(time),
+      cell(name),
+      cell(size, 'num'),
+      cell(formatCreatedAt(r.created_at), 'sub'),
+      statusCell(tr, r),
+      cell([save, cancel], 'actions'),
+    );
+    return tr;
+  }
+
+  async function load() {
+    msg.textContent = '読み込み中…';
+    msg.hidden = false;
+    rows.replaceChildren();
+    count.textContent = '';
+
+    try {
+      const res = await fetch('/api/reservations');
+      if (!res.ok) throw new Error();
+      const list = await res.json();
+
+      count.textContent = `全 ${list.length} 件`;
+      if (list.length === 0) {
+        msg.textContent = 'まだ予約はありません';
+        return;
+      }
+
+      for (const r of list) rows.append(renderRow(r));
+      msg.hidden = true;
+    } catch {
+      msg.textContent = '予約一覧を読み込めませんでした。時間をおいて再読み込みしてください。';
+    }
+  }
+
+  document.getElementById('reload').addEventListener('click', load);
+  load();
+</script>
+</body>
+</html>
