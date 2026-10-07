@@ -26,6 +26,9 @@
     font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
   }
   .wrap{max-width:960px;margin:0 auto;}
+  .userbar{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-bottom:16px;font-size:0.85rem;color:var(--text-sub);}
+  .userbar strong{color:var(--text-main);font-weight:600;}
+  .userbar form{margin:0;}
   header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
   .en{display:block;font-family:"Cormorant Garamond",serif;font-style:italic;color:var(--gold);font-size:0.95rem;}
   h1{margin:0;font-size:1.5rem;font-weight:600;letter-spacing:0.06em;}
@@ -55,9 +58,10 @@
   }
   select{cursor:pointer;}
   select:disabled{opacity:0.6;cursor:wait;}
-  select.s-unconfirmed{background:#fbf1dc;border-color:#e6cf9e;}
-  select.s-confirmed{background:#eaf0e3;border-color:#bfcfae;color:var(--green-deep);}
-  select.s-cancelled{background:#f1ece6;border-color:#d9d0c5;color:var(--text-sub);}
+  .badge{display:inline-block;padding:4px 10px;border:1px solid;border-radius:4px;font-size:0.85rem;}
+  .s-unconfirmed{background:#fbf1dc;border-color:#e6cf9e;}
+  .s-confirmed{background:#eaf0e3;border-color:#bfcfae;color:var(--green-deep);}
+  .s-cancelled{background:#f1ece6;border-color:#d9d0c5;color:var(--text-sub);}
   tr.cancelled td:not(.status):not(.actions){color:#a89a85;text-decoration:line-through;}
   tr.editing td{background:#fbf6ea;padding-top:8px;padding-bottom:8px;}
   tr.editing input[type="text"]{width:9em;}
@@ -69,6 +73,12 @@
 </head>
 <body>
 <div class="wrap">
+  <div class="userbar">
+    <span id="user"></span>
+    <form method="post" action="/admin/logout">
+      <button type="submit" class="small ghost">ログアウト</button>
+    </form>
+  </div>
   <header>
     <div>
       <span class="en">Reservations</span>
@@ -90,7 +100,7 @@
           <th>人数</th>
           <th>受付日時</th>
           <th>状態</th>
-          <th><span class="visually-hidden">操作</span></th>
+          <th id="actions-head"><span class="visually-hidden">操作</span></th>
         </tr>
       </thead>
       <tbody id="rows"></tbody>
@@ -105,12 +115,15 @@
   const msg = document.getElementById('msg');
   const count = document.getElementById('count');
   const toast = document.getElementById('toast');
+  const user = document.getElementById('user');
   const WEEK = ['日', '月', '火', '水', '木', '金', '土'];
   const STATUS_CLASS = { '未確認': 's-unconfirmed', '確認済み': 's-confirmed', 'キャンセル': 's-cancelled' };
   // お店のページの予約フォームと同じ選択肢
   const TIMES = Array.from({ length: 18 }, (_, i) => `${9 + Math.floor(i / 2)}:${i % 2 ? '30' : '00'}`);
   const SIZES = Array.from({ length: 10 }, (_, i) => i + 1);
   let toastTimer;
+  // 予約を変更できるか（店長だけ）。サーバーでも断っている
+  let canEdit = false;
 
   function showToast(text) {
     toast.textContent = text;
@@ -119,12 +132,33 @@
     toastTimer = setTimeout(() => { toast.hidden = true; }, 3000);
   }
 
+  // ログインが切れていたらログイン画面へ戻す
+  function checkLogin(res) {
+    if (res.status === 401) {
+      location.href = '/admin/login';
+      throw new Error('ログインしてください');
+    }
+  }
+
+  async function showUser() {
+    const res = await fetch('/api/me');
+    checkLogin(res);
+    if (!res.ok) return;
+    const me = await res.json();
+    const name = document.createElement('strong');
+    name.textContent = me.label;
+    user.replaceChildren('ログイン中：', name, `（${me.id}）`);
+    canEdit = me.canEdit === true;
+    document.getElementById('actions-head').hidden = !canEdit;
+  }
+
   async function saveReservation(id, changes) {
     const res = await fetch(`/api/reservations/${encodeURIComponent(id)}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(changes),
     });
+    checkLogin(res);
     const body = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(body.message || '保存できませんでした。もう一度お試しください。');
     return body;
@@ -178,6 +212,15 @@
   }
 
   function statusCell(tr, r) {
+    // スタッフには変更できない表示だけを出す
+    if (!canEdit) {
+      const badge = document.createElement('span');
+      badge.textContent = r.status;
+      badge.className = `badge ${STATUS_CLASS[r.status] || ''}`;
+      tr.classList.toggle('cancelled', r.status === 'キャンセル');
+      return cell(badge, 'status');
+    }
+
     const select = makeSelect(Object.keys(STATUS_CLASS), r.status, `${r.name}様の予約の状態`);
     applyStatus(tr, select, r.status);
 
@@ -206,8 +249,10 @@
       cell(`${r.party_size}名`, 'num'),
       cell(formatCreatedAt(r.created_at), 'sub'),
       statusCell(tr, r),
-      cell(makeButton('編集', 'small ghost', () => tr.replaceWith(renderEditRow(r))), 'actions'),
     );
+    if (canEdit) {
+      tr.append(cell(makeButton('編集', 'small ghost', () => tr.replaceWith(renderEditRow(r))), 'actions'));
+    }
     return tr;
   }
 
@@ -271,6 +316,7 @@
 
     try {
       const res = await fetch('/api/reservations');
+      checkLogin(res);
       if (!res.ok) throw new Error();
       const list = await res.json();
 
@@ -288,7 +334,8 @@
   }
 
   document.getElementById('reload').addEventListener('click', load);
-  load();
+  // 誰でログインしているか分かってから一覧を出す（店長かどうかで表示が変わるため）
+  showUser().catch(() => {}).then(load);
 </script>
 </body>
 </html>

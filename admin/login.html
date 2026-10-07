@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>ログイン | カフェ・アリストロメリア</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&family=Cormorant+Garamond:ital@1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#faf5ea;
+    --beige:#f2e8d8;
+    --beige-deep:#e9dcc4;
+    --green-deep:#6f8a5e;
+    --gold:#bf9a56;
+    --text-main:#4a3b30;
+    --text-sub:#7a6a5a;
+    --white:#fffdf8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;padding:64px 16px 48px;
+    background:var(--cream);color:var(--text-main);
+    font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  }
+  .box{
+    max-width:360px;margin:0 auto;padding:32px 28px;
+    background:var(--white);border:1px solid var(--beige-deep);border-radius:6px;
+  }
+  .en{display:block;font-family:"Cormorant Garamond",serif;font-style:italic;color:var(--gold);font-size:0.95rem;}
+  h1{margin:0 0 24px;font-size:1.4rem;font-weight:600;letter-spacing:0.06em;}
+  label{display:block;font-size:0.85rem;color:var(--text-sub);margin-bottom:6px;}
+  input{
+    width:100%;margin-bottom:18px;
+    font-family:inherit;font-size:1rem;color:var(--text-main);
+    padding:9px 10px;border:1px solid var(--beige-deep);border-radius:4px;background:var(--white);
+  }
+  button{
+    width:100%;margin-top:6px;
+    background:var(--green-deep);color:var(--white);border:none;border-radius:4px;
+    padding:10px 16px;font-family:inherit;font-size:0.95rem;cursor:pointer;
+  }
+  button:hover{opacity:0.9;}
+  .error{margin:0 0 18px;padding:10px 12px;background:#f8e9e4;border:1px solid #e6c4b8;border-radius:4px;color:#8a4b3a;font-size:0.85rem;}
+</style>
+</head>
+<body>
+<div class="box">
+  <span class="en">Admin Login</span>
+  <h1>管理画面ログイン</h1>
+  <p class="error" id="error" hidden>IDまたはパスワードが正しくありません</p>
+  <form method="post" action="/admin/login">
+    <label for="id">ID</label>
+    <input type="text" id="id" name="id" autocomplete="username" required autofocus>
+    <label for="password">パスワード</label>
+    <input type="password" id="password" name="password" autocomplete="current-password" required>
+    <button type="submit">ログイン</button>
+  </form>
+</div>
+<script>
+  if (new URLSearchParams(location.search).has('error')) {
+    document.getElementById('error').hidden = false;
+  }
+</script>
+</body>
+</html>
