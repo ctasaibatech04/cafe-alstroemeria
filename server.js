@@ -12,6 +12,12 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// お店のトップページ
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/api/reserve', async (req, res) => {
