@@ -637,8 +637,8 @@
 
   /* ---------- WEATHER (Open-Meteo) ---------- */
   (function(){
-    // デモのため東京駅付近の座標を使用。実店舗の緯度経度が分かり次第、差し替え可能。
-    const LAT = 35.6762, LON = 139.6503;
+    // デモのため大阪駅付近の座標を使用。実店舗の緯度経度が分かり次第、差し替え可能。
+    const LAT = 34.7025, LON = 135.4959;
     const iconEl = document.getElementById('weatherIcon');
     const textEl = document.getElementById('weatherText');
 
@@ -676,7 +676,7 @@
         const pop = data.daily.precipitation_probability_max[0];
         const [key, label] = codeToInfo(code);
         iconEl.innerHTML = icons[key] || icons.cloudy;
-        textEl.textContent = `東京：${label}／${temp}℃／降水確率${pop}%`;
+        textEl.textContent = `大阪：${label}／${temp}℃／降水確率${pop}%`;
       })
       .catch(() => {
         textEl.textContent = '天気情報を取得できませんでした';
