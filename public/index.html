@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js');</script>
 <title>カフェ・アリストロメリア | Café Alstroemeria</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
   :root{
     --cream:#faf5ea;
@@ -17,12 +18,15 @@
     --green:#8ba178;
     --green-deep:#6f8a5e;
     --gold:#bf9a56;
+    --gold-text:#7a5c22;
+    --green-text:#4f6a40;
     --text-main:#4a3b30;
-    --text-sub:#7a6a5a;
+    --text-sub:#6b5b4b;
     --white:#fffdf8;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
+  section[id]{scroll-margin-top:72px;}
   body{
     font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
     color:var(--text-main);
@@ -30,13 +34,13 @@
     line-height:1.9;
     letter-spacing:0.02em;
   }
-  img,svg{display:block;max-width:100%;}
+  img,svg{display:block;max-width:100%;height:auto;}
   a{text-decoration:none;color:inherit;}
   ul{list-style:none;}
   .en-label{
     font-family:"Cormorant Garamond",serif;
     letter-spacing:0.18em;
-    color:var(--gold);
+    color:var(--gold-text);
     font-size:0.85rem;
     text-transform:uppercase;
   }
@@ -46,13 +50,13 @@
   .divider-flower{display:flex;justify-content:center;margin:0 auto 40px;opacity:0.7;}
 
   /* ---------- SCROLL REVEAL ---------- */
-  .reveal{
+  .js .reveal{
     opacity:0;transform:translateY(18px);
     transition:opacity 0.7s ease, transform 0.7s ease;
   }
-  .reveal.is-visible{opacity:1;transform:translateY(0);}
+  .js .reveal.is-visible{opacity:1;transform:translateY(0);}
   @media (prefers-reduced-motion: reduce){
-    .reveal{opacity:1;transform:none;transition:none;}
+    .js .reveal,.js .reveal.is-visible{opacity:1;transform:none;transition:none;}
   }
 
   /* ---------- NAV ---------- */
@@ -92,7 +96,7 @@
 
   @media (max-width:820px){
     .nav-links{
-      position:fixed;top:0;right:0;height:100vh;width:min(72vw,320px);
+      position:fixed;top:0;right:0;height:100vh;height:100svh;width:min(72vw,320px);
       background:var(--white);flex-direction:column;justify-content:center;align-items:flex-start;
       gap:32px;padding:0 48px;
       transform:translateX(100%);transition:transform 0.4s ease;
@@ -104,16 +108,17 @@
 
   /* ---------- HERO ---------- */
   #home{
-    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;
     position:relative;padding:140px 24px 80px;
-    background-image:url('hero.png');
-    background-size:cover;
-    background-position:center;
-    overflow:hidden;
+    overflow:hidden;isolation:isolate;
+  }
+  .hero-bg{
+    position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;object-position:center;z-index:-1;
   }
   #home::before{
     content:"";position:absolute;inset:0;z-index:0;
-    background:linear-gradient(100deg,rgba(250,245,234,0.94) 0%,rgba(250,245,234,0.72) 38%,rgba(250,245,234,0.28) 65%,rgba(250,245,234,0.1) 100%);
+    background:linear-gradient(100deg,rgba(250,245,234,0.92) 0%,rgba(250,245,234,0.88) 45%,rgba(250,245,234,0.45) 58%,rgba(250,245,234,0) 72%);
   }
   .hero-inner{
     position:relative;z-index:1;
@@ -121,17 +126,17 @@
   }
   .hero-text{text-align:left;max-width:560px;}
   .hero-eyebrow{
-    font-family:"Cormorant Garamond",serif;font-style:italic;color:var(--gold);
+    font-family:"Cormorant Garamond",serif;font-style:italic;color:var(--gold-text);
     font-size:1.05rem;margin-bottom:18px;letter-spacing:0.05em;
   }
   .hero-text h1{
     font-size:2.5rem;font-weight:700;line-height:1.5;margin-bottom:22px;
   }
   .hero-text p.sub{
-    font-size:1.02rem;color:var(--text-sub);margin-bottom:26px;
+    font-size:1.02rem;color:#5a4b3e;margin-bottom:26px;
   }
   .hero-info{
-    display:inline-block;font-size:0.88rem;color:var(--green-deep);
+    display:inline-block;font-size:0.88rem;color:var(--green-text);
     border-top:1px solid var(--beige-deep);border-bottom:1px solid var(--beige-deep);
     padding:10px 0;margin-bottom:32px;
   }
@@ -144,7 +149,7 @@
     min-height:18px;line-height:18px;
   }
   .hero-weather .weather-icon{
-    display:flex;align-items:center;justify-content:center;color:var(--gold);
+    display:flex;align-items:center;justify-content:center;color:var(--gold-text);
     width:18px;height:18px;flex-shrink:0;
   }
   .hero-weather #weatherText{
@@ -155,8 +160,8 @@
     display:inline-block;padding:14px 30px;font-size:0.92rem;letter-spacing:0.08em;
     border-radius:2px;transition:all 0.3s ease;border:1px solid var(--gold);
   }
-  .btn-primary{background:var(--gold);color:var(--white);}
-  .btn-primary:hover{background:#a9843f;}
+  .btn-primary{background:var(--gold-text);border-color:var(--gold-text);color:var(--white);}
+  .btn-primary:hover{background:#5e461a;border-color:#5e461a;}
   .btn-outline{background:transparent;color:var(--text-main);border-color:var(--text-main);}
   .btn-outline:hover{background:var(--text-main);color:var(--white);}
 
@@ -172,6 +177,30 @@
     50%{transform:translate(-50%,8px);}
   }
 
+  /* ---------- HERO ENTRANCE (jsクラス付与後のみ初期非表示) ---------- */
+  .h1-line{display:block;overflow:hidden;}
+  .h1-line > span{display:block;}
+  .js .h1-line > span{
+    transform:translateY(100%);
+    animation:heroLine 0.9s cubic-bezier(.2,.7,.2,1) both;
+    animation-delay:calc(var(--d,0) * 0.12s);
+  }
+  .js [data-hero]{
+    opacity:0;transform:translateY(12px);
+    animation:heroFade 0.48s cubic-bezier(.2,.7,.2,1) both;
+    animation-delay:calc(var(--d,0) * 0.12s);
+  }
+  .js .hero-weather[data-hero]{transform:none;animation-name:heroFadeOnly;}
+  @keyframes heroLine{to{transform:translateY(0);}}
+  @keyframes heroFade{to{opacity:1;transform:translateY(0);}}
+  @keyframes heroFadeOnly{to{opacity:1;}}
+  @media (prefers-reduced-motion: reduce){
+    .js .h1-line > span,.js [data-hero]{
+      animation:none !important;opacity:1 !important;transform:none !important;
+    }
+    .scroll-hint{animation:none;}
+  }
+
   @media (max-width:820px){
     #home::before{
       background:linear-gradient(180deg,rgba(250,245,234,0.85) 0%,rgba(250,245,234,0.9) 55%,rgba(250,245,234,0.75) 100%);
@@ -184,7 +213,7 @@
   /* ---------- CONCEPT ---------- */
   #concept{padding:120px 24px;background:var(--white);}
   .concept-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;}
-  .concept-image img{width:100%;border-radius:6px;box-shadow:0 16px 36px rgba(74,59,48,0.14);}
+  .concept-image img{width:100%;height:auto;aspect-ratio:1/1;border-radius:6px;box-shadow:0 16px 36px rgba(74,59,48,0.14);}
   #concept .concept-inner{max-width:460px;text-align:left;}
   #concept h2{font-size:1.7rem;font-weight:600;margin-bottom:28px;}
   #concept p{color:var(--text-sub);font-size:1rem;}
@@ -196,28 +225,49 @@
 
   /* ---------- MENU ---------- */
   #menu{padding:120px 24px;background:var(--beige);}
-  .menu-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:48px;}
+  .menu-grid{display:flex;flex-direction:column;gap:96px;}
+  .menu-cat{position:relative;display:grid;grid-template-columns:1.05fr 1fr;column-gap:64px;align-content:center;}
+  .menu-cat > *{grid-column:2;position:relative;z-index:1;}
+  .menu-cat > .menu-cat-img{grid-column:1;grid-row:1 / span 20;align-self:center;}
+  .menu-cat:nth-child(even){grid-template-columns:1fr 1.05fr;}
+  .menu-cat:nth-child(even) > *{grid-column:1;}
+  .menu-cat:nth-child(even) > .menu-cat-img{grid-column:2;}
+  .menu-num{
+    position:absolute;top:-0.55em;right:0;z-index:0 !important;pointer-events:none;
+    font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(7rem,16vw,13rem);line-height:1;
+    color:rgba(201,169,97,0.20);
+  }
+  .menu-cat:nth-child(even) .menu-num{right:auto;left:0;}
   .menu-cat-img{
-    width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:6px;margin-bottom:20px;
+    width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:6px;
     box-shadow:0 12px 28px rgba(74,59,48,0.14);
   }
   .menu-cat-img img{width:100%;height:100%;object-fit:cover;display:block;}
   .menu-cat h3{
-    font-size:1.15rem;font-weight:600;margin-bottom:22px;padding-bottom:10px;
-    border-bottom:2px solid var(--gold);display:inline-block;
+    font-size:1.25rem;font-weight:600;margin-bottom:22px;padding-bottom:10px;
+    border-bottom:2px solid var(--gold);display:inline-block;justify-self:start;
   }
-  .menu-cat .en-tag{display:block;font-size:0.75rem;color:var(--gold);font-family:"Cormorant Garamond",serif;letter-spacing:0.12em;margin-bottom:4px;}
+  .menu-cat .en-tag{display:block;font-size:0.8rem;color:var(--gold-text);font-family:"Cormorant Garamond",serif;letter-spacing:0.12em;margin-bottom:4px;}
   .menu-item{
-    display:flex;justify-content:space-between;align-items:baseline;
-    padding:12px 0;border-bottom:1px dashed var(--beige-deep);
+    display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+    padding:12px 0;
   }
-  .menu-item:last-child{border-bottom:none;}
-  .menu-item .name{font-size:0.98rem;}
-  .menu-item .price{font-family:"Cormorant Garamond",serif;color:var(--green-deep);font-size:1rem;}
+  .menu-item .name{font-size:0.98rem;background:var(--beige);padding-right:8px;position:relative;z-index:1;}
+  .menu-item .price{font-family:"Cormorant Garamond",serif;color:var(--green-text);font-size:1.1rem;font-weight:500;background:var(--beige);padding-left:8px;position:relative;z-index:1;}
+  .menu-item{
+    background-image:radial-gradient(circle,rgba(74,59,48,0.45) 1px,transparent 1.5px);
+    background-size:8px 4px;background-repeat:repeat-x;background-position:0 calc(100% - 18px);
+  }
   .menu-note{
     text-align:center;margin-top:48px;font-size:0.85rem;color:var(--text-sub);
   }
-  @media (max-width:720px){.menu-grid{grid-template-columns:1fr;gap:40px;}}
+  @media (min-width:821px){.menu-cat:nth-child(even),.js .menu-cat.reveal:nth-child(even),.js .menu-cat.reveal.is-visible:nth-child(even){transform:translateY(40px);}.menu-grid{padding-bottom:40px;}}
+  @media (max-width:820px){
+    .menu-grid{gap:64px;}
+    .menu-cat,.menu-cat:nth-child(even){display:block;transform:none;}
+    .menu-cat > .menu-cat-img{margin-bottom:20px;}
+    .menu-cat .menu-num,.menu-cat:nth-child(even) .menu-num{top:-0.4em;right:0;left:auto;font-size:6rem;}
+  }
 
   /* ---------- ACCESS ---------- */
   #access{padding:120px 24px;background:var(--white);}
@@ -233,7 +283,7 @@
     vertical-align:top;font-size:0.95rem;
   }
   .access-table th{
-    width:110px;color:var(--green-deep);font-weight:600;white-space:nowrap;
+    width:110px;color:var(--green-text);font-weight:600;white-space:nowrap;
   }
   @media (max-width:820px){.access-grid{grid-template-columns:1fr;}}
 
@@ -247,7 +297,7 @@
   .form-group input.field-invalid,.form-group select.field-invalid{border-color:#c0392b;}
   .form-group input,.form-group textarea,.form-group select{
     padding:13px 16px;border:1px solid var(--beige-deep);
-    background:var(--white);font-family:inherit;font-size:0.95rem;color:var(--text-main);
+    background:var(--white);font-family:inherit;font-size:1rem;color:var(--text-main);
     border-radius:2px;box-sizing:border-box;
   }
   .form-group textarea{width:100%;min-height:130px;resize:vertical;}
@@ -306,17 +356,18 @@
 </header>
 
 <section id="home">
+  <img class="hero-bg" src="hero-1024.webp" srcset="hero-800.webp 800w, hero-1024.webp 1024w" sizes="100vw" width="1024" height="1024" fetchpriority="high" decoding="async" alt="">
   <div class="hero-inner">
     <div class="hero-text">
-      <p class="hero-eyebrow">— a warm little place —</p>
-      <h1>ひと息つける、<br>まちのカフェ。</h1>
-      <p class="sub">焼きたてのパンと、ていねいな一杯。<br>ひとりでも、ゆっくりどうぞ。</p>
-      <div class="hero-info">アリスト町駅から徒歩5分／9:00–18:00／土・日休み</div>
-      <div class="hero-weather" id="heroWeather" aria-live="polite">
+      <p class="hero-eyebrow" data-hero style="--d:0">— a warm little place —</p>
+      <h1><span class="h1-line"><span style="--d:1">ひと息つける、</span></span><span class="h1-line"><span style="--d:1.5">まちのカフェ。</span></span></h1>
+      <p class="sub" data-hero style="--d:3">焼きたてのパンと、ていねいな一杯。<br>ひとりでも、ゆっくりどうぞ。</p>
+      <div class="hero-info" data-hero style="--d:4">アリスト町駅から徒歩5分／9:00–18:00／土・日休み</div>
+      <div class="hero-weather" id="heroWeather" data-hero style="--d:5" aria-live="polite">
         <span class="weather-icon" id="weatherIcon"></span>
         <span id="weatherText">天気情報を読み込み中…</span>
       </div>
-      <div class="hero-buttons">
+      <div class="hero-buttons" data-hero style="--d:6">
         <a href="#menu" class="btn btn-primary">メニューを見る</a>
         <a href="#access" class="btn btn-outline">お店の場所を見る</a>
       </div>
@@ -328,7 +379,7 @@
 <section id="concept">
   <div class="container concept-grid">
     <div class="concept-image reveal">
-      <img src="concept.png" alt="店内の焼きたてパンとコーヒー、アリストロメリアの花">
+      <img src="concept.png" srcset="concept-800.webp 800w, concept-1024.webp 1024w" sizes="(max-width:820px) 100vw, 520px" width="1024" height="1024" loading="lazy" decoding="async" alt="店内の焼きたてパンとコーヒー、アリストロメリアの花">
     </div>
     <div class="concept-inner reveal">
       <p class="en-label">Concept</p>
@@ -351,8 +402,8 @@
     </div>
     <div class="menu-grid">
       <div class="menu-cat reveal">
-        <div class="menu-cat-img"><img src="menu-drink.png" alt="ハートのラテアートとアリストロメリアの花"></div>
-        <span class="en-tag">Coffee &amp; Drink</span>
+        <div class="menu-cat-img"><img src="menu-drink.png" srcset="menu-drink-800.webp 800w, menu-drink-1024.webp 1024w" sizes="(max-width:820px) 100vw, 480px" width="1024" height="1024" loading="lazy" decoding="async" alt="ハートのラテアートとアリストロメリアの花"></div>
+        <span class="menu-num" aria-hidden="true">01</span><span class="en-tag">Coffee &amp; Drink</span>
         <h3>コーヒー &amp; ドリンク</h3>
         <div class="menu-item"><span class="name">ブレンドコーヒー</span><span class="price">¥520</span></div>
         <div class="menu-item"><span class="name">カフェ・ラテ</span><span class="price">¥580</span></div>
@@ -361,8 +412,8 @@
         <div class="menu-item"><span class="name">自家製レモネード</span><span class="price">¥560</span></div>
       </div>
       <div class="menu-cat reveal">
-        <div class="menu-cat-img"><img src="menu-bakery.png" alt="焼きたてクロワッサンとアリストロメリアの花"></div>
-        <span class="en-tag">Bakery</span>
+        <div class="menu-cat-img"><img src="menu-bakery.png" srcset="menu-bakery-800.webp 800w, menu-bakery-1024.webp 1024w" sizes="(max-width:820px) 100vw, 480px" width="1024" height="1024" loading="lazy" decoding="async" alt="焼きたてクロワッサンとアリストロメリアの花"></div>
+        <span class="menu-num" aria-hidden="true">02</span><span class="en-tag">Bakery</span>
         <h3>ベーカリー</h3>
         <div class="menu-item"><span class="name">自家製クロワッサン</span><span class="price">¥320</span></div>
         <div class="menu-item"><span class="name">石窯カンパーニュ</span><span class="price">¥380</span></div>
@@ -370,16 +421,16 @@
         <div class="menu-item"><span class="name">季節のデニッシュ</span><span class="price">¥420</span></div>
       </div>
       <div class="menu-cat reveal">
-        <div class="menu-cat-img"><img src="menu-sweets.png" alt="季節のフルーツタルトとアリストロメリアの花"></div>
-        <span class="en-tag">Sweets</span>
+        <div class="menu-cat-img"><img src="menu-sweets.png" srcset="menu-sweets-800.webp 800w, menu-sweets-1024.webp 1024w" sizes="(max-width:820px) 100vw, 480px" width="1024" height="1024" loading="lazy" decoding="async" alt="季節のフルーツタルトとアリストロメリアの花"></div>
+        <span class="menu-num" aria-hidden="true">03</span><span class="en-tag">Sweets</span>
         <h3>スイーツ</h3>
         <div class="menu-item"><span class="name">ベイクドチーズケーキ</span><span class="price">¥560</span></div>
         <div class="menu-item"><span class="name">濃厚ガトーショコラ</span><span class="price">¥580</span></div>
         <div class="menu-item"><span class="name">季節のフルーツタルト</span><span class="price">¥620</span></div>
       </div>
       <div class="menu-cat reveal">
-        <div class="menu-cat-img"><img src="menu-food.png" alt="キッシュプレートとアリストロメリアの花"></div>
-        <span class="en-tag">Food</span>
+        <div class="menu-cat-img"><img src="menu-food.png" srcset="menu-food-800.webp 800w, menu-food-1024.webp 1024w" sizes="(max-width:820px) 100vw, 480px" width="1024" height="1024" loading="lazy" decoding="async" alt="キッシュプレートとアリストロメリアの花"></div>
+        <span class="menu-num" aria-hidden="true">04</span><span class="en-tag">Food</span>
         <h3>フード</h3>
         <div class="menu-item"><span class="name">本日のサンドイッチ</span><span class="price">¥780</span></div>
         <div class="menu-item"><span class="name">キッシュプレート</span><span class="price">¥980</span></div>
@@ -398,7 +449,7 @@
     </div>
     <div class="access-grid">
       <div class="map-illust reveal">
-        <img src="access-map.png" alt="Café Alstroemeriaへのアクセスマップ">
+        <img src="access-map.png" srcset="access-map-800.webp 800w, access-map-1024.webp 1024w" sizes="(max-width:820px) 100vw, 520px" width="1024" height="1024" loading="lazy" decoding="async" alt="Café Alstroemeriaへのアクセスマップ">
       </div>
       <table class="access-table reveal">
         <tr><th>住所</th><td>〒000-0000　架空県アリスト市あたたか町1-2-3<br>アリストロメリアビル 1F</td></tr>
